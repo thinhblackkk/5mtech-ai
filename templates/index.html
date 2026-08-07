@@ -2,93 +2,232 @@
 <html>
 
 <head>
-    <title>5mtech AI</title>
+
+<title>5mtech AI</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+}
+
+
+h1 {
+    text-align: center;
+}
+
+
+#chat {
+    border: 1px solid #ddd;
+    padding: 20px;
+    height: 400px;
+    overflow-y: auto;
+}
+
+
+.user {
+    text-align: right;
+    margin: 10px;
+}
+
+
+.user span {
+    background: #d1e7ff;
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+
+.bot {
+    text-align: left;
+    margin: 10px;
+}
+
+
+.bot span {
+    background: #eee;
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+
+.input-area {
+    margin-top: 20px;
+}
+
+
+input {
+    width: 80%;
+    padding: 10px;
+}
+
+
+button {
+    padding: 10px;
+}
+
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <h1>🤖 5mtech AI</h1>
+
 
 <div id="chat"></div>
 
 
+<div class="input-area">
+
 <input 
-    id="question"
-    type="text"
-    placeholder="Nhập câu hỏi..."
+id="question"
+placeholder="Nhập câu hỏi..."
 >
 
+
 <button onclick="sendMessage()">
-    Gửi
+Gửi
 </button>
+
+
+</div>
+
 
 
 <script>
 
+
 async function sendMessage(){
+
+
+let input = document.getElementById("question");
+
+let question = input.value;
+
+
+if(question.trim() === ""){
+    return;
+}
+
+
+
+let chat = document.getElementById("chat");
+
+
+
+chat.innerHTML +=
+`
+<div class="user">
+<span>
+<b>Bạn:</b> ${question}
+</span>
+</div>
+`;
+
+
+
+let response = await fetch("/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+question:question
+})
+
+});
+
+
+
+let data = await response.json();
+
+
+
+chat.innerHTML +=
+`
+<div class="bot">
+<span>
+<b>5mtech:</b> ${data.answer}
+</span>
+</div>
+`;
+
+
+
+input.value="";
+
+chat.scrollTop = chat.scrollHeight;
+
+
+}
+
+
+
 
 async function loadHistory(){
 
-    let response = await fetch("/history");
 
-    let data = await response.json();
-
-
-    let chat = document.getElementById("chat");
+let response = await fetch("/history");
 
 
-    data.messages.forEach(message => {
-
-        let name = message.role === "user"
-            ? "Bạn"
-            : "5mtech";
+let data = await response.json();
 
 
-        chat.innerHTML +=
-            "<p><b>" + name + ":</b> "
-            + message.text +
-            "</p>";
+let chat = document.getElementById("chat");
 
-    });
+
+
+data.messages.forEach(message=>{
+
+
+let name =
+message.role === "user"
+? "Bạn"
+: "5mtech";
+
+
+let type =
+message.role === "user"
+? "user"
+: "bot";
+
+
+
+chat.innerHTML +=
+`
+<div class="${type}">
+<span>
+<b>${name}:</b> ${message.text}
+</span>
+</div>
+`;
+
+
+
+});
+
+
+
+chat.scrollTop = chat.scrollHeight;
+
 
 }
+
 
 
 loadHistory();
 
-    let input = document.getElementById("question");
-    let question = input.value;
-
-
-    document.getElementById("chat").innerHTML +=
-        "<p><b>Bạn:</b> " + question + "</p>";
-
-
-    let response = await fetch("/chat", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            question: question
-        })
-
-    });
-
-
-    let data = await response.json();
-
-
-    document.getElementById("chat").innerHTML +=
-        "<p><b>5mtech:</b> " + data.answer + "</p>";
-
-
-    input.value = "";
-
-}
 
 </script>
 
