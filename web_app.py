@@ -2,9 +2,7 @@ from flask import Flask, render_template, request
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
 
-
 app = Flask(__name__)
-
 
 ai = FiveMTechAI()
 memory = FiveMTechMemory()
@@ -28,14 +26,17 @@ def chat():
 
     memory.add_model_message(response)
 
+    return {
+        "answer": response
+    }
+
+
 @app.route("/history")
 def history():
 
     return {
         "messages": memory.conversation
     }
-
-    return {"answer": response}
 
 
 if __name__ == "__main__":

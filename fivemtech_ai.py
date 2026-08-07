@@ -10,9 +10,11 @@ load_dotenv()
 class FiveMTechAI:
 
     def __init__(self):
+
         self.client = genai.Client(
             api_key=os.getenv("GEMINI_API_KEY")
         )
+
 
     def ask(self, contents):
 
@@ -25,9 +27,19 @@ class FiveMTechAI:
             ]
         })
 
-        response = self.client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=contents
-        )
 
-        return response.text
+        try:
+
+            response = self.client.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=contents
+            )
+
+            return response.text
+
+
+        except Exception as e:
+
+            print("Gemini error:", e)
+
+            return "Xin lỗi, hiện tại tao đang hết lượt suy nghĩ. Chờ một chút rồi thử lại nhé."
