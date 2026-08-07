@@ -28,6 +28,13 @@ def chat():
 
     memory.add_model_message(response)
 
+@app.route("/history")
+def history():
+
+    return {
+        "messages": memory.conversation
+    }
+
     return {"answer": response}
 
 

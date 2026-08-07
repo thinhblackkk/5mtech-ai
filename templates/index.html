@@ -27,6 +27,35 @@
 
 async function sendMessage(){
 
+async function loadHistory(){
+
+    let response = await fetch("/history");
+
+    let data = await response.json();
+
+
+    let chat = document.getElementById("chat");
+
+
+    data.messages.forEach(message => {
+
+        let name = message.role === "user"
+            ? "Bạn"
+            : "5mtech";
+
+
+        chat.innerHTML +=
+            "<p><b>" + name + ":</b> "
+            + message.text +
+            "</p>";
+
+    });
+
+}
+
+
+loadHistory();
+
     let input = document.getElementById("question");
     let question = input.value;
 
