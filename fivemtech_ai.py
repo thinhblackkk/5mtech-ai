@@ -1,6 +1,8 @@
 from google import genai
 import os
 
+from fivemtech_config import SYSTEM_PROMPT
+
 
 class FiveMTechAI:
 
@@ -10,6 +12,16 @@ class FiveMTechAI:
         )
 
     def ask(self, contents):
+
+        contents.insert(0, {
+            "role": "user",
+            "parts": [
+                {
+                    "text": SYSTEM_PROMPT
+                }
+            ]
+        })
+
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=contents
