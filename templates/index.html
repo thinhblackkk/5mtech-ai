@@ -9,22 +9,59 @@
 
 <h1>🤖 5mtech AI</h1>
 
-<p>Trợ lý AI dành cho dân văn phòng</p>
+<div id="chat"></div>
 
 
-<form method="POST" action="/chat">
+<input 
+    id="question"
+    type="text"
+    placeholder="Nhập câu hỏi..."
+>
 
-    <input 
-        type="text" 
-        name="question"
-        placeholder="Nhập câu hỏi..."
-    >
+<button onclick="sendMessage()">
+    Gửi
+</button>
 
-    <button type="submit">
-        Gửi
-    </button>
 
-</form>
+<script>
+
+async function sendMessage(){
+
+    let input = document.getElementById("question");
+    let question = input.value;
+
+
+    document.getElementById("chat").innerHTML +=
+        "<p><b>Bạn:</b> " + question + "</p>";
+
+
+    let response = await fetch("/chat", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            question: question
+        })
+
+    });
+
+
+    let data = await response.json();
+
+
+    document.getElementById("chat").innerHTML +=
+        "<p><b>5mtech:</b> " + data.answer + "</p>";
+
+
+    input.value = "";
+
+}
+
+</script>
 
 
 </body>

@@ -18,7 +18,7 @@ def home():
 @app.route("/chat", methods=["POST"])
 def chat():
 
-    question = request.form["question"]
+    question = request.json["question"]
 
     memory.add_user_message(question)
 
@@ -28,7 +28,7 @@ def chat():
 
     memory.add_model_message(response)
 
-    return response
+    return {"answer": response}
 
 
 if __name__ == "__main__":
