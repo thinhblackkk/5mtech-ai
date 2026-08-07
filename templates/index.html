@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>5mtech AI</title>
 </head>
@@ -10,9 +11,22 @@
 
 <p>Trợ lý AI dành cho dân văn phòng</p>
 
-<input type="text" placeholder="Nhập câu hỏi...">
 
-<button>Gửi</button>
+<form method="POST" action="/chat">
+
+    <input 
+        type="text" 
+        name="question"
+        placeholder="Nhập câu hỏi..."
+    >
+
+    <button type="submit">
+        Gửi
+    </button>
+
+</form>
+
 
 </body>
+
 </html>

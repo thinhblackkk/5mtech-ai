@@ -1,7 +1,10 @@
 from google import genai
 import os
+from dotenv import load_dotenv
 
 from fivemtech_config import SYSTEM_PROMPT
+
+load_dotenv()
 
 
 class FiveMTechAI:
