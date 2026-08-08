@@ -35,11 +35,11 @@ class FiveMTechAI:
                 contents=contents
             )
 
-            return response.text
+            return response.text, None
 
 
         except Exception as e:
 
             print("Gemini error:", e)
-
-            return "Xin lỗi, hiện tại tao đang hết lượt suy nghĩ. Chờ một chút rồi thử lại nhé."
+             
+            return None, e

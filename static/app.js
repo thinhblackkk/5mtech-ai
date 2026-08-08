@@ -56,7 +56,29 @@ async function sendMessage() {
 
 
         let data = await response.json();
+        
+        if (!response.ok) {
 
+    let thinking = document.getElementById("thinking");
+
+    if (thinking) {
+        thinking.remove();
+    }
+
+    chat.innerHTML += `
+        <div class="bot">
+            <span>
+                <b>5mtech:</b> ${data.error}
+            </span>
+        </div>
+    `;
+
+    input.value = "";
+    input.disabled = false;
+    isSending = false;
+
+    return;
+}
 
         let thinking = document.getElementById("thinking");
 

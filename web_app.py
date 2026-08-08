@@ -20,17 +20,21 @@ def chat():
 
     memory.add_user_message(question)
 
-    response = ai.ask(
+    response, error = ai.ask(
         memory.get_contents()
     )
+
+    if error:
+
+        return {
+            "error": "Gemini API đang gặp vấn đề."
+        }, 500
 
     memory.add_model_message(response)
 
     return {
         "answer": response
-    }
-
-
+}
 @app.route("/history")
 def history():
 
