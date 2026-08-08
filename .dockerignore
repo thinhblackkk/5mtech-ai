@@ -1,0 +1,7 @@
+.venv/
+.env
+memory.json
+.git/
+.gitignore
+__pycache__/
+*.pyc
