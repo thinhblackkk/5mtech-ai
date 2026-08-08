@@ -2,3 +2,4 @@
 .env
 memory.json
 __pycache__/
+profile.json

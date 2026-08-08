@@ -5,8 +5,12 @@ import os
 class FiveMTechMemory:
 
     def __init__(self):
+
         self.file = "memory.json"
+        self.profile_file = "profile.json"
+
         self.conversation = self.load()
+        self.profile = self.load_profile()
 
     def load(self):
 
@@ -25,13 +29,40 @@ class FiveMTechMemory:
                 ensure_ascii=False,
                 indent=4
             )
+    def load_profile(self):
 
+        if os.path.exists(self.profile_file):
+
+            with open(self.profile_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+        return {}
+    def save_profile(self):
+
+        with open(self.profile_file, "w", encoding="utf-8") as f:
+
+            json.dump(
+                self.profile,
+                f,
+                ensure_ascii=False,
+                indent=4
+            )
+    def update_profile(self, key, value):
+
+        self.profile[key] = value
+
+        self.save_profile()
     def add_user_message(self, text):
 
         self.conversation.append({
             "role": "user",
             "text": text
         })
+
+        self.save()
+    def clear(self):
+
+        self.conversation = []
 
         self.save()
 
@@ -47,7 +78,7 @@ class FiveMTechMemory:
     def get_contents(self):
 
         contents = []
-
+        recent_messages = self.conversation[-20:]
         for message in self.conversation:
 
             contents.append({

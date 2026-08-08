@@ -18,10 +18,20 @@ def chat():
 
     question = request.json["question"]
 
-    memory.add_user_message(question)
+    contents = memory.get_contents()
+
+    contents.append({
+    "role": "user",
+    "parts": [
+        {
+            "text": question
+        }
+    ]
+})
 
     response, error = ai.ask(
-        memory.get_contents()
+        contents,
+        memory.profile
     )
 
     if error:
@@ -29,6 +39,13 @@ def chat():
         return {
             "error": "Gemini API đang gặp vấn đề."
         }, 500
+    memory_data = ai.extract_memory(question)
+
+    for key, value in memory_data.items():
+
+        memory.update_profile(key, value)
+
+    memory.add_user_message(question)
 
     memory.add_model_message(response)
 
@@ -40,6 +57,15 @@ def history():
 
     return {
         "messages": memory.conversation
+    }
+
+@app.route("/clear", methods=["POST"])
+def clear():
+
+    memory.clear()
+
+    return {
+        "success": True
     }
 
 

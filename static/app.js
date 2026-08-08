@@ -1,3 +1,14 @@
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
 let isSending = false;
 
 
@@ -9,6 +20,7 @@ async function sendMessage() {
 
     let input = document.getElementById("question");
     let question = input.value.trim();
+    let safeQuestion = escapeHTML(question);
 
     if (question === "") {
         return;
@@ -22,7 +34,7 @@ async function sendMessage() {
     chat.innerHTML += `
         <div class="user">
             <span>
-                <b>Bạn:</b> ${question}
+                <b>Bạn:</b> ${safeQuestion}
             </span>
         </div>
     `;
@@ -90,7 +102,7 @@ async function sendMessage() {
         chat.innerHTML += `
             <div class="bot">
                 <span>
-                    <b>5mtech:</b> ${data.answer}
+                    <b>5mtech:</b> ${escapeHTML(data.answer)}
                 </span>
             </div>
         `;
@@ -139,8 +151,8 @@ async function loadHistory() {
     let chat = document.getElementById("chat");
 
 
-    data.messages.forEach(message => {
-
+    
+    data.messages.slice(-20).forEach(message => {
         let name =
             message.role === "user"
             ? "Bạn"
@@ -188,3 +200,21 @@ document.getElementById("question").addEventListener(
 
     }
 );
+
+document.getElementById("clear-chat").addEventListener("click", async function() {
+
+    let response = await fetch("/clear", {
+        method: "POST"
+    });
+
+    let data = await response.json();
+
+    if(data.success){
+
+        let chat = document.getElementById("chat");
+
+        chat.innerHTML = "";
+
+    }
+
+});
