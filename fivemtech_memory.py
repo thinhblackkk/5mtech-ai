@@ -48,24 +48,30 @@ class FiveMTechMemory:
                 indent=4
             )
     def update_profile(self, key, value):
-        
-        if key == "preferences":
 
-            if key not in self.profile:
+            list_fields = [
+                "preferences",
+                "skills",
+                "goals"
+            ]
 
-                self.profile[key] = []
+            if key in list_fields:
 
-            for item in value:
+                if key not in self.profile:
 
-                if item not in self.profile[key]:
+                    self.profile[key] = []
 
-                    self.profile[key].append(item)
+                for item in value:
 
-        else:
+                    if item not in self.profile[key]:
 
-            self.profile[key] = value
+                        self.profile[key].append(item)
 
-        self.save_profile()
+            else:
+
+                self.profile[key] = value
+
+            self.save_profile()
     def add_user_message(self, text):
 
         self.conversation.append({

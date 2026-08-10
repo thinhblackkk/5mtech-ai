@@ -48,6 +48,23 @@ class FiveMTechMemoryParser:
                 return {
                     "preferences": [preference]
                 }
+        if lower_question.startswith("tao biết "):
 
+            skill = question[9:].strip()
+
+            if skill:
+
+                return {
+                    "skills": [skill]
+                }
+        if lower_question.startswith("mục tiêu của tao là "):
+
+            goal = question[19:].strip()
+
+            if goal:
+
+                return {
+                    "goals": [goal]
+                }
 
         return {}
