@@ -48,8 +48,22 @@ class FiveMTechMemory:
                 indent=4
             )
     def update_profile(self, key, value):
+        
+        if key == "preferences":
 
-        self.profile[key] = value
+            if key not in self.profile:
+
+                self.profile[key] = []
+
+            for item in value:
+
+                if item not in self.profile[key]:
+
+                    self.profile[key].append(item)
+
+        else:
+
+            self.profile[key] = value
 
         self.save_profile()
     def add_user_message(self, text):

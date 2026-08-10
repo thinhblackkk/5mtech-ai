@@ -46,7 +46,7 @@ class FiveMTechMemoryParser:
             if preference:
 
                 return {
-                    "preference": preference
+                    "preferences": [preference]
                 }
 
 
