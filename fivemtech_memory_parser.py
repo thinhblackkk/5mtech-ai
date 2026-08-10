@@ -39,5 +39,15 @@ class FiveMTechMemoryParser:
                     "job": job
                 }
 
+        if lower_question.startswith("tao thích "):
+
+            preference = question[10:].strip()
+
+            if preference:
+
+                return {
+                    "preference": preference
+                }
+
 
         return {}
