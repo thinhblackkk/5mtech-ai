@@ -1,4 +1,5 @@
 import os
+import pymupdf
 from flask import Flask, render_template, request
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
@@ -54,8 +55,24 @@ def chat():
 
         if os.path.exists(file_path):
 
-            with open(file_path, "r", encoding="utf-8") as f:
-                file_content = f.read()
+            if filename.lower().endswith(".pdf"):
+
+                pdf = pymupdf.open(file_path)
+
+                pages = []
+
+                for page in pdf:
+
+                    pages.append(page.get_text())
+
+                pdf.close()
+
+                file_content = "\n\n".join(pages)
+
+            else:
+
+                with open(file_path, "r", encoding="utf-8") as f:
+                    file_content = f.read()
 
     contents = memory.get_contents()
 
