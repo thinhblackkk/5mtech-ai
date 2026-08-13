@@ -229,30 +229,64 @@ document.getElementById("file-input").addEventListener(
     function() {
 
         let file = this.files[0];
+
         let fileName = document.getElementById("file-name");
+        let fileCenter = document.getElementById("file-center");
 
         if (file) {
+
             fileName.textContent = file.name;
+            fileCenter.style.display = "flex";
+
         } else {
+
             fileName.textContent = "";
+            fileCenter.style.display = "none";
+
         }
 
     }
 );
-document.getElementById("clear-chat").addEventListener("click", async function() {
 
-    let response = await fetch("/clear", {
-        method: "POST"
-    });
+document.getElementById("remove-file").addEventListener(
+    "click",
+    async function() {
 
-    let data = await response.json();
+        let response = await fetch("/clear-file", {
+            method: "POST"
+        });
 
-    if(data.success){
+        let data = await response.json();
 
-        let chat = document.getElementById("chat");
+        if (data.success) {
 
-        chat.innerHTML = "";
+            document.getElementById("file-input").value = "";
+            document.getElementById("file-name").textContent = "";
+            document.getElementById("file-center").style.display = "none";
+
+        }
 
     }
+);
+document.getElementById("clear-chat").addEventListener(
+    "click",
+    async function() {
 
-});
+        let response = await fetch("/clear", {
+            method: "POST"
+        });
+
+        let data = await response.json();
+
+        if (data.success) {
+
+            document.getElementById("chat").innerHTML = "";
+
+            document.getElementById("file-input").value = "";
+            document.getElementById("file-name").textContent = "";
+            document.getElementById("file-center").style.display = "none";
+
+        }
+
+    }
+);

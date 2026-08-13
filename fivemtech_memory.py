@@ -74,25 +74,28 @@ class FiveMTechMemory:
                 self.profile[key] = value
 
             self.save_profile()
-    def add_user_message(self, text):
+    def add_user_message(self, text, has_file=False):
 
         self.conversation.append({
             "role": "user",
-            "text": text
+            "text": text,
+            "has_file": has_file
         })
 
         self.save()
+
     def clear(self):
 
         self.conversation = []
         self.file_context = None
         self.save()
 
-    def add_model_message(self, text):
+    def add_model_message(self, text, has_file=False):
 
         self.conversation.append({
             "role": "model",
-            "text": text
+            "text": text,
+            "has_file": has_file
         })
 
         self.save()
@@ -100,8 +103,13 @@ class FiveMTechMemory:
     def get_contents(self):
 
         contents = []
+
         recent_messages = self.conversation[-20:]
+
         for message in recent_messages:
+
+            if message.get("has_file", False) and self.file_context is None:
+                continue
 
             contents.append({
                 "role": message["role"],

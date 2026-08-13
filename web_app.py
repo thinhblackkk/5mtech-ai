@@ -90,9 +90,15 @@ def chat():
 
         memory.update_profile(key, value)
 
-    memory.add_user_message(question)
+    memory.add_user_message(
+        question,
+        has_file=bool(filename)
+    )
 
-    memory.add_model_message(response)
+    memory.add_model_message(
+    response,
+    has_file=bool(filename)
+)
 
     return {
         "answer": response
@@ -108,6 +114,15 @@ def history():
 def clear():
 
     memory.clear()
+
+    return {
+        "success": True
+    }
+
+@app.route("/clear-file", methods=["POST"])
+def clear_file():
+
+    memory.clear_file_context()
 
     return {
         "success": True
