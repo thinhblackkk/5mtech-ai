@@ -20,9 +20,12 @@ async function sendMessage() {
 
     let input = document.getElementById("question");
     let question = input.value.trim();
+    let fileInput = document.getElementById("file-input");
+    let file = fileInput.files[0];
+    let uploadedFilename = "";
     let safeQuestion = escapeHTML(question);
 
-    if (question === "") {
+    if (question === "" && !file) {
         return;
     }
 
@@ -52,23 +55,41 @@ async function sendMessage() {
 
     try {
 
+        let formData = new FormData();
+        formData.append("question", question);
+        if (file) {
+
+            let uploadData = new FormData();
+
+            uploadData.append("file", file);
+
+            let uploadResponse = await fetch("/upload", {
+                method: "POST",
+                body: uploadData
+            });
+
+            let uploadResult = await uploadResponse.json();
+
+            if (!uploadResponse.ok) {
+                throw new Error(uploadResult.error || "Upload file thất bại.");
+            }
+
+            uploadedFilename = uploadResult.filename;
+            formData.append("filename", uploadedFilename);
+
+        }
+
         let response = await fetch("/chat", {
 
             method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                question: question
-            })
+            body: formData
 
         });
 
 
         let data = await response.json();
-        
+
         if (!response.ok) {
 
     let thinking = document.getElementById("thinking");
@@ -131,6 +152,9 @@ async function sendMessage() {
 
     input.value = "";
 
+    fileInput.value = "";
+    document.getElementById("file-name").textContent = "";
+
     input.disabled = false;
     isSending = false;
 
@@ -151,7 +175,7 @@ async function loadHistory() {
     let chat = document.getElementById("chat");
 
 
-    
+
     data.messages.slice(-20).forEach(message => {
         let name =
             message.role === "user"
@@ -200,7 +224,21 @@ document.getElementById("question").addEventListener(
 
     }
 );
+document.getElementById("file-input").addEventListener(
+    "change",
+    function() {
 
+        let file = this.files[0];
+        let fileName = document.getElementById("file-name");
+
+        if (file) {
+            fileName.textContent = file.name;
+        } else {
+            fileName.textContent = "";
+        }
+
+    }
+);
 document.getElementById("clear-chat").addEventListener("click", async function() {
 
     let response = await fetch("/clear", {

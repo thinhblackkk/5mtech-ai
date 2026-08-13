@@ -6,8 +6,10 @@ class FiveMTechMemory:
 
     def __init__(self):
 
-        self.file = "memory.json"
-        self.profile_file = "profile.json"
+        data_dir = os.getenv("DATA_DIR", ".")
+
+        self.file = os.path.join(data_dir, "memory.json")
+        self.profile_file = os.path.join(data_dir, "profile.json")
 
         self.conversation = self.load()
         self.profile = self.load_profile()
@@ -99,7 +101,7 @@ class FiveMTechMemory:
 
         contents = []
         recent_messages = self.conversation[-20:]
-        for message in self.conversation:
+        for message in recent_messages:
 
             contents.append({
                 "role": message["role"],

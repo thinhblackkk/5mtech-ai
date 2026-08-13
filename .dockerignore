@@ -1,6 +1,7 @@
 .venv/
 .env
 memory.json
+profile.json
 .git/
 .gitignore
 __pycache__/
