@@ -37,17 +37,25 @@ def chat():
 
     print("CHAT FILENAME:", filename)
 
-    file_path = os.path.join(
-        UPLOAD_DIR,
-        filename
-    )
-
     file_content = ""
 
-    if filename and os.path.exists(file_path):
+    if filename:
+        memory.set_file_context(filename)
 
-        with open(file_path, "r", encoding="utf-8") as f:
-            file_content = f.read()
+    elif memory.file_context:
+        filename = memory.file_context
+
+    if filename:
+
+        file_path = os.path.join(
+            UPLOAD_DIR,
+            filename
+        )
+
+        if os.path.exists(file_path):
+
+            with open(file_path, "r", encoding="utf-8") as f:
+                file_content = f.read()
 
     contents = memory.get_contents()
 
@@ -64,7 +72,6 @@ def chat():
             }
         ]
     })
-
     response, error = ai.ask(
         contents,
         memory.profile

@@ -13,7 +13,7 @@ class FiveMTechMemory:
 
         self.conversation = self.load()
         self.profile = self.load_profile()
-
+        self.file_context = None
     def load(self):
 
         if os.path.exists(self.file):
@@ -85,7 +85,7 @@ class FiveMTechMemory:
     def clear(self):
 
         self.conversation = []
-
+        self.file_context = None
         self.save()
 
     def add_model_message(self, text):
@@ -113,3 +113,12 @@ class FiveMTechMemory:
             })
 
         return contents
+
+    def set_file_context(self, filename):
+
+        self.file_context = filename
+
+
+    def clear_file_context(self):
+
+        self.file_context = None
