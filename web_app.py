@@ -2,6 +2,7 @@ import os
 import pymupdf
 from file_reader import read_file
 from data_analyzer import analyze_file
+from data_query import query_file
 from flask import Flask, render_template, request
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
@@ -42,6 +43,7 @@ def chat():
 
     file_content = ""
     analysis_result = None
+    query_result = None
 
     if filename:
         memory.set_file_context(filename)
@@ -78,6 +80,19 @@ def chat():
                     "DATA ANALYSIS ERROR:",
                     e
                 )
+        try:
+
+            query_result = query_file(
+                file_path,
+                question
+            )
+
+        except Exception as e:
+
+            print(
+                "DATA QUERY ERROR:",
+                e
+            )
 
     contents = memory.get_contents()
 
@@ -96,6 +111,13 @@ def chat():
                 "\n\nKẾT QUẢ PHÂN TÍCH "
                 "BẰNG PYTHON:\n"
                 f"{analysis_result}"
+            )
+        if query_result is not None:
+
+            ai_question += (
+                "\n\nKẾT QUẢ TRUY VẤN "
+                "BẰNG PYTHON:\n"
+                f"{query_result}"
             )
 
     contents.append({
