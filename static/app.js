@@ -9,6 +9,19 @@ function escapeHTML(text) {
 
 }
 
+function renderMarkdown(text) {
+
+    let html = escapeHTML(text);
+
+    html = html.replace(
+        /\*\*(.*?)\*\*/g,
+        "<strong>$1</strong>"
+    );
+
+    return html;
+
+}
+
 let isSending = false;
 
 
@@ -123,7 +136,7 @@ async function sendMessage() {
         chat.innerHTML += `
             <div class="bot">
                 <span>
-                    <b>5mtech:</b> ${escapeHTML(data.answer)}
+                    <b>5mtech:</b> ${renderMarkdown(data.answer)}
                 </span>
             </div>
         `;
