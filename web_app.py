@@ -93,7 +93,199 @@ def chat():
                 "DATA QUERY ERROR:",
                 e
             )
+    if query_result is not None:
 
+        result_type = query_result.get("type")
+        answer = None
+
+        if result_type == "person":
+
+            row = query_result["row"]
+            column = query_result.get("column")
+            value = query_result.get("value")
+
+            if column and value is not None:
+
+                answer = (
+                    f"Dựa trên dữ liệu từ sheet "
+                    f"**{query_result['sheet']}**, "
+                    f"**{column}** của **{row.get('Tên')}** "
+                    f"là **{value:,}**."
+                )
+
+            else:
+
+                details = ", ".join(
+                    f"**{key}**: {value}"
+                    for key, value in row.items()
+                )
+
+                answer = (
+                    f"Dựa trên dữ liệu từ sheet "
+                    f"**{query_result['sheet']}**: "
+                    f"{details}"
+                )
+
+        elif result_type == "sum":
+
+            answer = (
+                f"Dựa trên dữ liệu từ sheet "
+                f"**{query_result['sheet']}**, "
+                f"tổng **{query_result['column']}** là "
+                f"**{query_result['value']:,}**."
+            )
+
+        elif result_type == "sum_filtered":
+
+            operator_text = {
+                ">": "trên",
+                ">=": "từ",
+                "<": "dưới",
+                "<=": "không quá"
+            }.get(
+                query_result.get("operator"),
+                ""
+            )
+
+            value = query_result.get("value")
+
+            answer = (
+                f"Dựa trên dữ liệu từ sheet "
+                f"**{query_result['sheet']}**, "
+                f"tổng **{query_result['column']}** "
+                f"của những người {operator_text} "
+                f"**{value:,.0f}** là "
+                f"**{query_result['sum']:,}**."
+            )
+
+        elif result_type == "average":
+
+            answer = (
+                f"Dựa trên dữ liệu từ sheet "
+                f"**{query_result['sheet']}**, "
+                f"giá trị trung bình của "
+                f"**{query_result['column']}** là "
+                f"**{query_result['value']:,.0f}**."
+            )
+
+        elif result_type in ["max", "min"]:
+
+            rows = query_result["rows"]
+
+            names = ", ".join(
+                f"**{row.get('Tên', 'Không rõ')}**"
+                for row in rows
+            )
+
+            label = (
+                "cao nhất"
+                if result_type == "max"
+                else "thấp nhất"
+            )
+
+            answer = (
+                f"Dựa trên dữ liệu từ sheet "
+                f"**{query_result['sheet']}**, "
+                f"{names} có "
+                f"{query_result['column']} {label}: "
+                f"**{query_result['value']:,}**."
+            )
+
+        elif result_type == "filtered_aggregate":
+
+            rows = query_result["rows"]
+
+            if not rows:
+
+                answer = "Không tìm thấy dữ liệu phù hợp."
+
+            else:
+
+                operator_text = {
+                    ">": "trên",
+                    ">=": "từ",
+                    "<": "dưới",
+                    "<=": "không quá"
+                }.get(
+                    query_result.get("operator"),
+                    ""
+                )
+
+                value = query_result.get("value")
+
+                names = ", ".join(
+                    f"**{row.get('Tên', 'Không rõ')}**"
+                    for row in rows
+                )
+
+                answer = (
+                    f"Dựa trên dữ liệu từ sheet "
+                    f"**{query_result['sheet']}**, "
+                    f"có **{len(rows)}** người có "
+                    f"**{query_result['column']} {operator_text} "
+                    f"{value:,.0f}**: {names}."
+                )
+
+        elif result_type == "filtered_range":
+
+            rows = query_result["rows"]
+
+            if not rows:
+
+                answer = "Không tìm thấy dữ liệu phù hợp."
+
+            else:
+
+                names = ", ".join(
+                    f"**{row.get('Tên', 'Không rõ')}**"
+                    for row in rows
+                )
+
+                answer = (
+                    f"Dựa trên dữ liệu từ sheet "
+                    f"**{query_result['sheet']}**, "
+                    f"có **{len(rows)}** kết quả trong khoảng "
+                    f"**{query_result['min_value']:,.0f} - "
+                    f"{query_result['max_value']:,.0f}**: "
+                    f"{names}."
+                )
+
+        elif result_type == "filtered":
+
+            rows = query_result["rows"]
+
+            if not rows:
+
+                answer = "Không tìm thấy dữ liệu phù hợp."
+
+            else:
+
+                names = ", ".join(
+                    f"**{row.get('Tên', 'Không rõ')}**"
+                    for row in rows
+                )
+
+                answer = (
+                    f"Dựa trên dữ liệu từ sheet "
+                    f"**{query_result['sheet']}**, "
+                    f"có **{len(rows)}** kết quả: "
+                    f"{names}."
+                )
+
+        if answer is not None:
+
+            memory.add_user_message(
+                question,
+                has_file=bool(filename)
+            )
+
+            memory.add_model_message(
+                answer
+            )
+
+            return {
+                "answer": answer
+            }
     contents = memory.get_contents()
 
     ai_question = question
@@ -115,11 +307,14 @@ def chat():
         if query_result is not None:
 
             ai_question += (
-                "\n\nKẾT QUẢ TRUY VẤN "
-                "BẰNG PYTHON:\n"
-                f"{query_result}"
+                "\n\nKẾT QUẢ TRUY VẤN BẰNG PYTHON:\n"
+                f"{query_result}\n\n"
+                "QUY TẮC QUAN TRỌNG: "
+                "Kết quả truy vấn bằng Python là nguồn dữ liệu chính xác "
+                "cho câu hỏi này. Hãy ưu tiên và sử dụng chính xác kết quả "
+                "này để trả lời người dùng. Không tự suy diễn hoặc thay đổi "
+                "các giá trị trong kết quả truy vấn."
             )
-
     contents.append({
         "role": "user",
         "parts": [
