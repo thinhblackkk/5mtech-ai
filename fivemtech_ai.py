@@ -57,7 +57,37 @@ class FiveMTechAI:
 
             print("Gemini error:", e)
 
-            return None, e
+            error_text = str(e)
+
+            if "429" in error_text or "RESOURCE_EXHAUSTED" in error_text:
+
+                return None, {
+                    "type": "quota",
+                    "error": e
+                }
+
+            if "timeout" in error_text.lower():
+
+                return None, {
+                    "type": "timeout",
+                    "error": e
+                }
+
+            if (
+                "401" in error_text
+                or "403" in error_text
+                or "API_KEY" in error_text.upper()
+            ):
+
+                return None, {
+                    "type": "authentication",
+                    "error": e
+                }
+
+            return None, {
+                "type": "api_error",
+                "error": e
+            }
     
     
     def extract_memory(self, question):

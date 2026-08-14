@@ -333,9 +333,35 @@ def chat():
 
         print("GEMINI ERROR:", error)
 
+        error_type = (
+            error.get("type")
+            if isinstance(error, dict)
+            else "api_error"
+        )
+
+        error_messages = {
+
+            "quota":
+                "5mtech AI đang tạm hết lượt sử dụng Gemini. "
+                "Bạn hãy thử lại sau ít phút.",
+
+            "timeout":
+                "5mtech AI phản hồi quá lâu. "
+                "Bạn hãy thử lại.",
+
+            "authentication":
+                "5mtech AI chưa được cấu hình API hợp lệ.",
+
+            "api_error":
+                "5mtech AI đang gặp sự cố với dịch vụ AI."
+        }
+
         return {
-            "error": "Gemini API đang gặp vấn đề."
-        }, 500
+            "error": error_messages.get(
+                error_type,
+                error_messages["api_error"]
+            )
+        }, 503
     memory_data = ai.extract_memory(question)
 
     for key, value in memory_data.items():
