@@ -110,6 +110,86 @@ def get_numeric_columns(rows):
 
     return columns
 
+def filter_rows(rows, column, operator, value):
+
+    filtered = []
+
+    for row in rows:
+
+        row_value = row.get(column)
+
+        if operator == "==":
+
+            matched = row_value == value
+
+        elif operator == "!=":
+
+            matched = row_value != value
+
+        elif operator == ">":
+
+            matched = row_value > value
+
+        elif operator == ">=":
+
+            matched = row_value >= value
+
+        elif operator == "<":
+
+            matched = row_value < value
+
+        elif operator == "<=":
+
+            matched = row_value <= value
+
+        else:
+
+            raise ValueError(
+                f"Toán tử không được hỗ trợ: {operator}"
+            )
+
+        if matched:
+
+            filtered.append(row)
+
+    return filtered
+
+
+def aggregate_rows(rows, column):
+
+    if not rows:
+
+        return {
+            "count": 0,
+            "sum": 0,
+            "average": 0,
+            "min": None,
+            "max": None
+        }
+
+    values = [
+        row[column]
+        for row in rows
+        if isinstance(row.get(column), (int, float))
+    ]
+
+    if not values:
+
+        return {
+            "count": len(rows),
+            "sum": 0,
+            "average": 0,
+            "min": None,
+            "max": None
+        }
+
+    return {
+        "count": len(values),
+        "sum": sum(values),
+        "average": sum(values) / len(values),
+        "min": min(values),
+        "max": max(values)
+    }
 
 def analyze_rows(rows):
 
