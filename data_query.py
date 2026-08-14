@@ -247,6 +247,41 @@ def query_file(file_path, question):
                 column
             )
         }
+    if (
+        "tổng" in question_lower
+        or "tất cả" in question_lower
+    ):
+
+        statistics = aggregate_rows(
+            rows,
+            column
+        )
+
+        return {
+            "type": "sum",
+            "sheet": selected_sheet,
+            "column": column,
+            "value": statistics["sum"],
+            "statistics": statistics
+        }
+    if (
+        "trung bình" in question_lower
+        or "bình quân" in question_lower
+        or "average" in question_lower
+    ):
+
+        statistics = aggregate_rows(
+            rows,
+            column
+        )
+
+        return {
+            "type": "average",
+            "sheet": selected_sheet,
+            "column": column,
+            "value": statistics["average"],
+            "statistics": statistics
+        }
     operator = None
     
     range_match = re.search(
