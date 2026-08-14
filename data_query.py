@@ -171,8 +171,84 @@ def query_file(file_path, question):
         if column is None:
 
             return None
+    if (
+        "cao nhất" in question_lower
+        or "lớn nhất" in question_lower
+        or "nhiều nhất" in question_lower
+    ):
 
+        values = [
+            row.get(column)
+            for row in rows
+            if isinstance(
+                row.get(column),
+                (int, float)
+            )
+        ]
+
+        if not values:
+
+            return None
+
+        max_value = max(values)
+
+        filtered = [
+            row
+            for row in rows
+            if row.get(column) == max_value
+        ]
+
+        return {
+            "type": "max",
+            "sheet": selected_sheet,
+            "column": column,
+            "value": max_value,
+            "rows": filtered,
+            "statistics": aggregate_rows(
+                filtered,
+                column
+            )
+        }
+    if (
+        "thấp nhất" in question_lower
+        or "nhỏ nhất" in question_lower
+        or "ít nhất" in question_lower
+    ):
+
+        values = [
+            row.get(column)
+            for row in rows
+            if isinstance(
+                row.get(column),
+                (int, float)
+            )
+        ]
+
+        if not values:
+
+            return None
+
+        min_value = min(values)
+
+        filtered = [
+            row
+            for row in rows
+            if row.get(column) == min_value
+        ]
+
+        return {
+            "type": "min",
+            "sheet": selected_sheet,
+            "column": column,
+            "value": min_value,
+            "rows": filtered,
+            "statistics": aggregate_rows(
+                filtered,
+                column
+            )
+        }
     operator = None
+    
     range_match = re.search(
         r"từ\s*"
         r"(\d+(?:[.,]\d+)?)\s*"
