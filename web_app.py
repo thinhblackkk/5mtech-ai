@@ -1,6 +1,7 @@
 import os
 import pymupdf
 from file_reader import read_file
+from data_analyzer import analyze_file
 from flask import Flask, render_template, request
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
@@ -40,6 +41,7 @@ def chat():
     print("CHAT FILENAME:", filename)
 
     file_content = ""
+    analysis_result = None
 
     if filename:
         memory.set_file_context(filename)
@@ -58,12 +60,43 @@ def chat():
 
             file_content = read_file(file_path)
 
+        extension = os.path.splitext(
+            filename
+        )[1].lower()
+
+        if extension in [".csv", ".xlsx"]:
+
+            try:
+
+                analysis_result = analyze_file(
+                    file_path
+                )
+
+            except Exception as e:
+
+                print(
+                    "DATA ANALYSIS ERROR:",
+                    e
+                )
+
     contents = memory.get_contents()
 
     ai_question = question
 
     if filename:
-        ai_question += f"\n\nNội dung file {filename}:\n{file_content}"
+
+        ai_question += (
+            f"\n\nNội dung file {filename}:\n"
+            f"{file_content}"
+        )
+
+        if analysis_result is not None:
+
+            ai_question += (
+                "\n\nKẾT QUẢ PHÂN TÍCH "
+                "BẰNG PYTHON:\n"
+                f"{analysis_result}"
+            )
 
     contents.append({
         "role": "user",
