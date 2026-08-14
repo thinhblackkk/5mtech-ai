@@ -103,7 +103,25 @@ def find_text_value(rows, column, question):
             return value
 
     return None
+def find_person_row(rows, question):
 
+    question_lower = question.lower()
+
+    for row in rows:
+
+        name = row.get("Tên")
+
+        if not isinstance(name, str):
+            continue
+
+        if re.search(
+            rf"\b{re.escape(name.lower().strip())}\b",
+            question_lower
+        ):
+
+            return row
+
+    return None
 
 def query_file(file_path, question):
 
@@ -154,13 +172,105 @@ def query_file(file_path, question):
 
             return None
 
+    operator = None
+    range_match = re.search(
+        r"từ\s*"
+        r"(\d+(?:[.,]\d+)?)\s*"
+        r"(tỷ|triệu|tr|nghìn|k)?\s*"
+        r"(?:đến|-)\s*"
+        r"(\d+(?:[.,]\d+)?)\s*"
+        r"(tỷ|triệu|tr|nghìn|k)?",
+        question_lower
+    )
+
+    if range_match:
+
+        start_unit = (
+            range_match.group(2)
+            or range_match.group(4)
+            or ""
+        )
+
+        end_unit = (
+            range_match.group(4)
+            or range_match.group(2)
+            or ""
+        )
+
+        start_value = parse_number(
+            range_match.group(1)
+            + " "
+            + start_unit
+        )
+
+        end_value = parse_number(
+            range_match.group(3)
+            + " "
+            + end_unit
+        )
+
+        filtered = []
+
+        for row in rows:
+
+            row_value = row.get(column)
+
+            if (
+                isinstance(row_value, (int, float))
+                and start_value <= row_value <= end_value
+            ):
+
+                filtered.append(row)
+
+        return {
+            "type": "filtered_range",
+            "sheet": selected_sheet,
+            "column": column,
+            "min_value": start_value,
+            "max_value": end_value,
+            "rows": filtered,
+            "statistics": aggregate_rows(
+                filtered,
+                column
+            )
+        }
     if (
-        "trên" in question_lower
-        or "hơn" in question_lower
+        "trở lên" in question_lower
+        or "từ" in question_lower
+        and "trở lên" in question_lower
+        or ">=" in question_lower
     ):
 
+        operator = ">="
+
+    elif (
+        "trên" in question_lower
+        or "hơn" in question_lower
+        or ">" in question_lower
+    ):
+
+        operator = ">"
+
+    elif (
+        "trở xuống" in question_lower
+        or "không quá" in question_lower
+        or "<=" in question_lower
+    ):
+
+        operator = "<="
+
+    elif (
+        "dưới" in question_lower
+        or "ít hơn" in question_lower
+        or "<" in question_lower
+    ):
+
+        operator = "<"
+
+    if operator is not None:
+
         match = re.search(
-            r"(?:trên|hơn)\s*"
+            r"(?:trên|hơn|dưới|ít hơn|từ|không quá|trở lên|trở xuống)\s*"
             r"(\d+(?:[.,]\d+)?)\s*"
             r"(tỷ|triệu|tr|nghìn|k)?",
             question_lower
@@ -181,7 +291,7 @@ def query_file(file_path, question):
         filtered = filter_rows(
             rows,
             column,
-            ">",
+            operator,
             value
         )
 
@@ -189,7 +299,7 @@ def query_file(file_path, question):
             "type": "filtered_aggregate",
             "sheet": selected_sheet,
             "column": column,
-            "operator": ">",
+            "operator": operator,
             "value": value,
             "rows": filtered,
             "statistics": aggregate_rows(
@@ -197,7 +307,34 @@ def query_file(file_path, question):
                 column
             )
         }
+    person_row = find_person_row(
+        rows,
+        question_lower
+    )
 
+    if person_row is not None:
+
+        asked_column = None
+
+        for key in person_row.keys():
+
+            key_lower = key.lower()
+
+            if key_lower in question_lower:
+                asked_column = key
+                break
+
+        if asked_column is None:
+
+            asked_column = "Tên"
+
+        return {
+            "type": "person",
+            "sheet": selected_sheet,
+            "column": asked_column,
+            "value": person_row.get(asked_column),
+            "row": person_row
+        }   
     text_value = find_text_value(
         rows,
         column,
