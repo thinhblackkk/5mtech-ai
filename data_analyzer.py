@@ -135,11 +135,28 @@ def analyze_rows(rows):
             for row in rows
         ]
 
+        min_value = min(values)
+        max_value = max(values)
+
+        min_row = next(
+            row
+            for row in rows
+            if row[column] == min_value
+        )
+
+        max_row = next(
+            row
+            for row in rows
+            if row[column] == max_value
+        )
+
         result["statistics"][column] = {
             "sum": sum(values),
             "average": sum(values) / len(values),
-            "min": min(values),
-            "max": max(values)
+            "min": min_value,
+            "min_row": min_row,
+            "max": max_value,
+            "max_row": max_row
         }
 
     return result
