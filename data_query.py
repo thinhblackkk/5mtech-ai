@@ -252,6 +252,77 @@ def query_file(file_path, question):
         or "tất cả" in question_lower
     ):
 
+        operator = None
+
+        if (
+            "trở lên" in question_lower
+            or ">=" in question_lower
+        ):
+
+            operator = ">="
+
+        elif (
+            "trên" in question_lower
+            or "hơn" in question_lower
+            or ">" in question_lower
+        ):
+
+            operator = ">"
+
+        elif (
+            "trở xuống" in question_lower
+            or "không quá" in question_lower
+            or "<=" in question_lower
+        ):
+
+            operator = "<="
+
+        elif (
+            "dưới" in question_lower
+            or "ít hơn" in question_lower
+            or "<" in question_lower
+        ):
+
+            operator = "<"
+
+        if operator is not None:
+
+            match = re.search(
+                r"(?:trên|hơn|dưới|ít hơn|trở lên|trở xuống|không quá)\s*"
+                r"(\d+(?:[.,]\d+)?)\s*"
+                r"(tỷ|triệu|tr|nghìn|k)?",
+                question_lower
+            )
+
+            if match:
+
+                value = parse_number(
+                    match.group(0)
+                )
+
+                filtered = filter_rows(
+                    rows,
+                    column,
+                    operator,
+                    value
+                )
+
+                statistics = aggregate_rows(
+                    filtered,
+                    column
+                )
+
+                return {
+                    "type": "sum_filtered",
+                    "sheet": selected_sheet,
+                    "column": column,
+                    "operator": operator,
+                    "value": value,
+                    "rows": filtered,
+                    "statistics": statistics,
+                    "sum": statistics["sum"]
+                }
+
         statistics = aggregate_rows(
             rows,
             column
@@ -263,25 +334,7 @@ def query_file(file_path, question):
             "column": column,
             "value": statistics["sum"],
             "statistics": statistics
-        }
-    if (
-        "trung bình" in question_lower
-        or "bình quân" in question_lower
-        or "average" in question_lower
-    ):
-
-        statistics = aggregate_rows(
-            rows,
-            column
-        )
-
-        return {
-            "type": "average",
-            "sheet": selected_sheet,
-            "column": column,
-            "value": statistics["average"],
-            "statistics": statistics
-        }
+        }    
     operator = None
     
     range_match = re.search(
