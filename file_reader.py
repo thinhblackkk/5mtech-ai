@@ -4,6 +4,7 @@ import json
 
 import pymupdf
 from docx import Document
+from openpyxl import load_workbook
 
 
 def read_text_file(file_path):
@@ -78,6 +79,41 @@ def read_json_file(file_path):
         indent=2
     )
 
+def read_xlsx_file(file_path):
+
+    workbook = load_workbook(
+        file_path,
+        read_only=True,
+        data_only=True
+    )
+
+    sheets = []
+
+    for sheet in workbook.worksheets:
+
+        rows = []
+
+        for row in sheet.iter_rows(values_only=True):
+
+            values = []
+
+            for value in row:
+
+                if value is None:
+                    values.append("")
+                else:
+                    values.append(str(value))
+
+            rows.append(" | ".join(values))
+
+        sheet_text = f"[Sheet: {sheet.title}]\n" + "\n".join(rows)
+
+        sheets.append(sheet_text)
+
+    workbook.close()
+
+    return "\n\n".join(sheets)
+
 
 def read_file(file_path):
 
@@ -98,5 +134,9 @@ def read_file(file_path):
     if extension == ".json":
 
         return read_json_file(file_path)
+
+    if extension == ".xlsx":
+
+        return read_xlsx_file(file_path)
 
     return read_text_file(file_path)
