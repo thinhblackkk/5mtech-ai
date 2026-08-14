@@ -6,6 +6,7 @@ from data_query import query_file
 from flask import Flask, render_template, request
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
+from werkzeug.utils import secure_filename
 
 DATA_DIR = os.getenv("DATA_DIR", ".")
 
@@ -394,7 +395,32 @@ def upload():
             "error": "Tên file không hợp lệ."
         }, 400
 
-    filename = file.filename
+    filename = secure_filename(file.filename)
+
+    if not filename:
+        return {
+            "error": "Tên file không hợp lệ."
+        }, 400
+
+    allowed_extensions = {
+        ".xlsx",
+        ".csv",
+        ".pdf",
+        ".txt"
+    }
+
+    extension = os.path.splitext(
+        filename
+    )[1].lower()
+
+    if extension not in allowed_extensions:
+
+        return {
+            "error": (
+                "Định dạng file chưa được hỗ trợ. "
+                "Chỉ hỗ trợ XLSX, CSV, PDF và TXT."
+            )
+        }, 400
 
     file_path = os.path.join(
         UPLOAD_DIR,
@@ -403,10 +429,11 @@ def upload():
 
     file.save(file_path)
 
+    memory.set_file_context(filename)
+
     return {
         "success": True,
         "filename": filename
     }
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
