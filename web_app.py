@@ -3,10 +3,16 @@ import pymupdf
 from file_reader import read_file
 from data_analyzer import analyze_file
 from data_query import query_file
-from flask import Flask, render_template, request
+from flask import (
+    Flask,
+    render_template,
+    request,
+    session
+)
 from fivemtech_ai import FiveMTechAI
 from fivemtech_memory import FiveMTechMemory
 from werkzeug.utils import secure_filename
+import secrets
 
 DATA_DIR = os.getenv("DATA_DIR", ".")
 
@@ -20,11 +26,67 @@ os.makedirs(
     exist_ok=True
 )
 
+
 app = Flask(__name__)
 
-ai = FiveMTechAI()
-memory = FiveMTechMemory()
+app.secret_key = os.getenv(
+    "FLASK_SECRET_KEY",
+    "dev-only-change-this-secret"
+)
 
+ai = FiveMTechAI()
+
+
+SESSIONS_DIR = os.path.join(
+    DATA_DIR,
+    "sessions"
+)
+
+os.makedirs(
+    SESSIONS_DIR,
+    exist_ok=True
+)
+
+
+def get_session_id():
+
+    if "session_id" not in session:
+
+        session["session_id"] = secrets.token_urlsafe(32)
+
+    return session["session_id"]
+
+
+def get_memory():
+
+    session_id = get_session_id()
+
+    session_dir = os.path.join(
+        SESSIONS_DIR,
+        session_id
+    )
+
+    return FiveMTechMemory(
+        session_dir
+    )
+
+
+def get_upload_dir():
+
+    session_id = get_session_id()
+
+    upload_dir = os.path.join(
+        SESSIONS_DIR,
+        session_id,
+        "uploads"
+    )
+
+    os.makedirs(
+        upload_dir,
+        exist_ok=True
+    )
+
+    return upload_dir
 
 @app.route("/")
 def home():
@@ -35,6 +97,8 @@ def home():
 def chat():
 
     question = request.form.get("question", "").strip()
+
+    memory = get_memory()
 
     filename = request.form.get("filename", "").strip()
 
@@ -54,8 +118,10 @@ def chat():
 
     if filename:
 
+        upload_dir = get_upload_dir()
+
         file_path = os.path.join(
-            UPLOAD_DIR,
+            upload_dir,
             filename
         )
 
@@ -381,8 +447,11 @@ def chat():
     return {
         "answer": response
 }
+
 @app.route("/history")
 def history():
+
+    memory = get_memory()
 
     return {
         "messages": memory.conversation
@@ -390,6 +459,8 @@ def history():
 
 @app.route("/clear", methods=["POST"])
 def clear():
+
+    memory = get_memory()
 
     memory.clear()
 
@@ -399,6 +470,8 @@ def clear():
 
 @app.route("/clear-file", methods=["POST"])
 def clear_file():
+
+    memory = get_memory()
 
     memory.clear_file_context()
 
@@ -448,12 +521,16 @@ def upload():
             )
         }, 400
 
+    upload_dir = get_upload_dir()
+
     file_path = os.path.join(
-        UPLOAD_DIR,
+        upload_dir,
         filename
     )
 
     file.save(file_path)
+
+    memory = get_memory()
 
     memory.set_file_context(filename)
 

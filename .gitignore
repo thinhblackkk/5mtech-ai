@@ -4,3 +4,4 @@ memory.json
 __pycache__/
 profile.json
 uploads/
+sessions/
